@@ -3,6 +3,7 @@ package ua.anatolii.graphics.ninepatch;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.NinePatch;
 import android.graphics.Rect;
 import android.graphics.drawable.NinePatchDrawable;
 
@@ -14,23 +15,57 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Created by Anatolii on 8/27/13.
  */
 public class NinePatchChunk implements Externalizable{
 
-	// The 9 patch segment is not a solid color.
+	/**
+	 * The 9 patch segment is not a solid color.
+	 */
 	public static final int NO_COLOR = 0x00000001;
-	// The 9 patch segment is completely transparent.
+
+	/**
+	 * The 9 patch segment is completely transparent.
+	 */
 	public static final int TRANSPARENT_COLOR = 0x00000000;
 
+	/**
+	 * By default it's true
+	 */
 	public boolean wasSerialized = true;
+
+	/**
+	 * Horizontal stretchable areas list.
+	 */
 	public ArrayList<Div> xDivs;
+
+	/**
+	 * Vertical stretchable areas list.
+	 */
 	public ArrayList<Div> yDivs;
+
+	/**
+	 * Content padding
+	 */
 	public Rect padding = new Rect();
+
+	/**
+	 * Colors array for chunks. If not sure what it is - fill it with NO_COLOR value. Or just use createColorsArray() method with current chunk instance.
+	 */
 	public int colors[];
 
+	/**
+	 * Creates new NinePatchChunk from byte array.
+	 * Note! In order to avoid some Runtime issues, please, do this check before using this method: NinePatch.isNinePatchChunk(byte[] chunk).
+	 * @param data array of chunk data
+	 * @return parsed NinePatch chunk.
+	 * @throws DivLengthException if there's no horizontal or vertical stretchable area at all.
+	 * @throws ChunkNotSerializedException if first bit is 0. I simply didn't face this case. If you will - feel free to contact me.
+	 * @throws BufferUnderflowException if the position of reading buffer is equal or greater than limit (data array length).
+	 */
 	public static NinePatchChunk parse(byte[] data) throws DivLengthException, ChunkNotSerializedException, BufferUnderflowException {
 		ByteBuffer byteBuffer = ByteBuffer.wrap(data).order(ByteOrder.nativeOrder());
 
@@ -72,6 +107,13 @@ public class NinePatchChunk implements Externalizable{
 		return chunk;
 	}
 
+	/**
+	 * Creates NinePatchDrawable right from raw Bitmap object. So resulting drawable will have width and height 2 pixels less if it is raw, not compiled 9-patch resource.
+	 * @param resources
+	 * @param bitmap The bitmap describing the patches. Can be loaded from application resources
+	 * @param srcName The name of the source for the bitmap. Might be null.
+	 * @return new NinePatchDrawable object or null if bitmap parameter is null.
+	 */
 	public static NinePatchDrawable create9PatchDrawable(Resources resources, Bitmap bitmap, String srcName) {
 		if (bitmap == null) return null;
 		Bitmap outBitmap;
@@ -79,21 +121,26 @@ public class NinePatchChunk implements Externalizable{
 		if (bitmap.getWidth() < 3 || bitmap.getHeight() < 3) {
 			outBitmap = bitmap;
 			chunk = NinePatchChunk.createEmptyChunk();
-		} else {
+		} else if(NinePatch.isNinePatchChunk(bitmap.getNinePatchChunk())){
+			outBitmap = bitmap;
+			chunk = NinePatchChunk.parse(bitmap.getNinePatchChunk());
+		}else{
 			outBitmap = Bitmap.createBitmap(bitmap, 1, 1, bitmap.getWidth() - 2, bitmap.getHeight() - 2);
 			try {
 				chunk = createChunk(bitmap);
 			} catch (WrongPaddingException e) {
-				e.printStackTrace();
 				chunk = NinePatchChunk.createEmptyChunk();
 			} catch (DivLengthException e) {
-				e.printStackTrace();
 				chunk = NinePatchChunk.createEmptyChunk();
 			}
 		}
 		return new NinePatchDrawable(resources, outBitmap, chunk.toBytes(), chunk.padding, srcName);
 	}
 
+	/**
+	 * Simply creates new empty NinePatchChunk object. You can use it to modify data as you want to.
+	 * @return new NinePatchChunk instance.
+	 */
 	public static NinePatchChunk createEmptyChunk() {
 		NinePatchChunk out = new NinePatchChunk();
 		out.colors = new int[0];
@@ -103,6 +150,10 @@ public class NinePatchChunk implements Externalizable{
 		return out;
 	}
 
+	/**
+	 * Serializes current chunk instance to byte array. This array will pass thia check: NinePatch.isNinePatchChunk(byte[] chunk)
+	 * @return The 9-patch data chunk describing how the underlying bitmap is split apart and drawn.
+	 */
 	public byte[] toBytes() {
 		int capacity = 4 + (7 * 4) + xDivs.size() * 2 * 4 + yDivs.size() * 2 * 4 + colors.length * 4;
 		ByteBuffer byteBuffer = ByteBuffer.allocate(capacity).order(ByteOrder.nativeOrder());
@@ -138,6 +189,34 @@ public class NinePatchChunk implements Externalizable{
 
 		return byteBuffer.array();
 
+	}
+
+	/**
+	 * Util method. Creates new colors array filled with NO_COLOR value according to current divs state and sets it to the chunk.
+	 * @param chunk chunk instance which contains divs information.
+	 * @param bitmapWidth width of bitmap. Note! This value must be width without 9-patch borders. (2 pixels less then original 9.png image width)
+	 * @param bitmapHeight height of bitmap. Note! This value must be height without 9-patch borders. (2 pixels less then original 9.png image height)
+	 */
+	public static void createColorsArrayAndSet(NinePatchChunk chunk, int bitmapWidth, int bitmapHeight){
+		int[] colorsArray = createColorsArray(chunk, bitmapWidth, bitmapHeight);
+		if(chunk != null)
+			chunk.colors = colorsArray;
+	}
+
+	/**
+	 * Util method. Creates new colors array according to current divs state.
+	 * @param chunk chunk instance which contains divs information.
+	 * @param bitmapWidth width of bitmap. Note! This value must be width without 9-patch borders. (2 pixels less then original 9.png image width)
+	 * @param bitmapHeight height of bitmap. Note! This value must be height without 9-patch borders. (2 pixels less then original 9.png image height)
+	 * @return new properly sized array filled with NO_COLOR value.
+	 */
+	public static int[] createColorsArray(NinePatchChunk chunk, int bitmapWidth, int bitmapHeight){
+		if(chunk == null) return new int[0];
+		ArrayList<Div> xRegions = getRegions(chunk.xDivs, bitmapWidth);
+		ArrayList<Div> yRegions = getRegions(chunk.yDivs, bitmapHeight);
+		int[] out = new int[xRegions.size() * yRegions.size()];
+		Arrays.fill(out, NO_COLOR);
+		return out;
 	}
 
 	@Override
@@ -192,8 +271,10 @@ public class NinePatchChunk implements Externalizable{
 	}
 
 	private static void setupColors(Bitmap bitmap, NinePatchChunk out) {
-		ArrayList<Div> xRegions = getRegions(out.xDivs, bitmap.getWidth() - 2);
-		ArrayList<Div> yRegions = getRegions(out.yDivs, bitmap.getHeight() - 2);
+		int bitmapWidth = bitmap.getWidth() - 2;
+		int bitmapHeight = bitmap.getHeight() - 2;
+		ArrayList<Div> xRegions = getRegions(out.xDivs, bitmapWidth);
+		ArrayList<Div> yRegions = getRegions(out.yDivs, bitmapHeight);
 		out.colors = new int[xRegions.size() * yRegions.size()];
 
 		int colorIndex = 0;
@@ -251,7 +332,7 @@ public class NinePatchChunk implements Externalizable{
 
 	private static ArrayList<Div> getRegions(ArrayList<Div> divs, int max) {
 		ArrayList<Div> out = new ArrayList<Div>();
-		if (divs.size() == 0) return out;
+		if (divs == null || divs.size() == 0) return out;
 		for (int i = 0; i < divs.size(); i++) {
 			Div div = divs.get(i);
 			if (i == 0 && div.start != 0) {
