@@ -3,7 +3,7 @@ package ua.anatolii.graphics.ninepatch;
 /**
  * Created by Anatolii on 8/28/13.
  */
-public class ChunkNotSerializedException extends Exception{
+public class ChunkNotSerializedException extends RuntimeException{
 	public ChunkNotSerializedException() {
 	}
 

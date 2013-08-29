@@ -3,7 +3,7 @@ package ua.anatolii.graphics.ninepatch;
 /**
  * Created by Anatolii on 8/28/13.
  */
-public class DivLengthException extends Exception {
+public class DivLengthException extends RuntimeException {
 	public DivLengthException() {
 	}
 
