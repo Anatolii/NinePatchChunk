@@ -29,6 +29,7 @@ proguard/
 .idea/
 
 # Gradle project files
+/gradle-app.setting
 build/
 .gradle/
-ui/wrapper/
+**/ui/wrapper/dists/
