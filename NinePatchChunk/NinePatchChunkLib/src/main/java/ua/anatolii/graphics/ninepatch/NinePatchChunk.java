@@ -118,13 +118,13 @@ public class NinePatchChunk implements Externalizable{
 		if (bitmap == null) return null;
 		Bitmap outBitmap;
 		NinePatchChunk chunk;
-		if (bitmap.getWidth() < 3 || bitmap.getHeight() < 3) {
-			outBitmap = bitmap;
-			chunk = NinePatchChunk.createEmptyChunk();
-		} else if(NinePatch.isNinePatchChunk(bitmap.getNinePatchChunk())){
+		if(NinePatch.isNinePatchChunk(bitmap.getNinePatchChunk())){
 			outBitmap = bitmap;
 			chunk = NinePatchChunk.parse(bitmap.getNinePatchChunk());
-		}else{
+		}else if (bitmap.getWidth() < 3 || bitmap.getHeight() < 3 || !isRawNinePatchBitmap(bitmap)) {
+			outBitmap = bitmap;
+			chunk = NinePatchChunk.createEmptyChunk();
+		} else {
 			outBitmap = Bitmap.createBitmap(bitmap, 1, 1, bitmap.getWidth() - 2, bitmap.getHeight() - 2);
 			try {
 				chunk = createChunk(bitmap);
@@ -219,6 +219,65 @@ public class NinePatchChunk implements Externalizable{
 		return out;
 	}
 
+	/**
+	 * Checks if bitmap is raw, not compiled 9-patch resource.
+	 * @param bitmap
+	 * @return true if so and false if not or bitmap is null.
+	 */
+	public static boolean isRawNinePatchBitmap(Bitmap bitmap) {
+		if(bitmap == null) return false;
+		if(!isCornerPixelsAreTrasperent(bitmap))
+			return false;
+		if(!hasNinePatchBorder(bitmap))
+			return false;
+		return true;
+	}
+
+	private static boolean hasNinePatchBorder(Bitmap bitmap) {
+		int width = bitmap.getWidth();
+		int height = bitmap.getHeight();
+		int lastXPixel = width-1;
+		int lastYPixel = height -1;
+		for(int i=1; i< lastXPixel; i++){
+			if(!isBorderPixel(bitmap.getPixel(i, 0)) || !isBorderPixel(bitmap.getPixel(i, lastYPixel)))
+				return false;
+		}
+		for (int i=1; i<lastYPixel; i++){
+			if(!isBorderPixel(bitmap.getPixel(0, i)) || !isBorderPixel(bitmap.getPixel(lastXPixel, i)))
+				return false;
+		}
+		if(getXDivs(bitmap, 0).size() == 0)
+			return false;
+		if(getXDivs(bitmap, lastYPixel).size() >1)
+			return false;
+		if(getYDivs(bitmap, 0).size() == 0)
+			return false;
+		if(getYDivs(bitmap, lastXPixel).size() > 1)
+			return false;
+		return true;
+	}
+
+	private static boolean isBorderPixel(int tmpPixel1) {
+		return isTransparent(tmpPixel1) || isBlack(tmpPixel1);
+	}
+
+	private static boolean isCornerPixelsAreTrasperent(Bitmap bitmap) {
+		int lastYPixel = bitmap.getHeight()-1;
+		int lastXPixel = bitmap.getWidth()-1;
+		return isTransparent(bitmap.getPixel(0, 0))
+				&& isTransparent(bitmap.getPixel(0, lastYPixel))
+				&& isTransparent(bitmap.getPixel(lastXPixel, 0))
+				&& isTransparent(bitmap.getPixel(lastXPixel, lastYPixel));
+	}
+
+	private static boolean isTransparent(int color) {
+		return Color.alpha(color) == Color.TRANSPARENT;
+	}
+
+	private static boolean isBlack(int pixel) {
+		return pixel == Color.BLACK;
+	}
+
 	@Override
 	public void readExternal(ObjectInput input) throws IOException, ClassNotFoundException {
 		int length = input.readInt();
@@ -283,7 +342,10 @@ public class NinePatchChunk implements Externalizable{
 				int startX = xDiv.start + 1;
 				int startY = yDiv.start + 1;
 				if (hasSameColor(bitmap, startX, xDiv.stop + 1, startY, yDiv.stop + 1)) {
-					out.colors[colorIndex] = bitmap.getPixel(startX, startY);
+					int pixel = bitmap.getPixel(startX, startY);
+					if(isTransparent(pixel))
+						pixel = TRANSPARENT_COLOR;
+					out.colors[colorIndex] = pixel;
 				} else {
 					out.colors[colorIndex] = NO_COLOR;
 				}
@@ -368,13 +430,13 @@ public class NinePatchChunk implements Externalizable{
 	}
 
 	private static Div processChunk(int pixel, Div tmpDiv, int position, ArrayList<Div> divs) {
-		if (pixel == Color.BLACK) {
+		if (isBlack(pixel)) {
 			if (tmpDiv == null) {
 				tmpDiv = new Div();
 				tmpDiv.start = position;
 			}
 		}
-		if (pixel == Color.TRANSPARENT) {
+		if (isTransparent(pixel)) {
 			if (tmpDiv != null) {
 				tmpDiv.stop = position;
 				divs.add(tmpDiv);
