@@ -17,13 +17,13 @@ The main class of the library is NinePatchChunk.<br>
 Firstly let's go through the fields of the class object you would use.
 
 - <code>boolean wasSerialized</code> - The indicator if this chunk was serialized or not. I didn't saw images without this variable equals true. If you will - feel free to contact me. This value is <code>true</code> by default.<br>
-- <code>ArrayList\<Div\> xDivs</code> - An array with stratchable areas goes on X axes. The 0 start pixel is pixel of actual bitmab without 9-patch 1-pixel border. The <code>Div</code> class will be described bellow. By default this value is null<br>
+- <code>ArrayList\<Div\> xDivs</code> - An array with stretchbзle areas goes on X axes. The 0 start pixel is pixel of actual bitmap without 9-patch 1-pixel border. The <code>Div</code> class will be described bellow. By default this value is null<br>
 - <code>ArrayList\<Div\> yDivs</code> - The same as xDivs but for the Y axes.
-- <code>Rect padding</code> - The paddings from the ends of bitmap which you set while creating regular 9-patch image by definig right and bottom borders in Android 9-patch editor.<br>
+- <code>Rect padding</code> - The paddings from the ends of bitmap which you set while creating regular 9-patch image by defining right and bottom borders in Android 9-patch editor.<br>
 Let's put some example. Let's say that you have 7x7 9-patch image. and you want the content will be exactly in the middle of the image.<br>
 So your final image size without 9-patch specific borders would be 5x5 and if you want the contend will be placed inside 3-d pixel area you sould define paddings as <code>Rect(2,2,2,2)</code>
-- <code>int colors[]</code> - The colors of arrays which represents areas crossing X and Y stratchable and nonstratchable areas of 9-patch bitmap. For more information look on <code>struct Res_png_9patch</code> commentaries <b>[here](https://android.googlesource.com/platform/frameworks/base/+/master/include/androidfw/ResourceTypes.h)</b>.<br>
-Long story short, if you have the same color in the area - the color for thar area will be that color. If color of that area is Tranparen (has alpha 0) - the color should be <code>Color.TRANSPARANT</code>. If the area is filled with different colors - the array should content <code>NO_COLOR</code> value. See static methods description to see how easily properly create this array.
+- <code>int colors[]</code> - The colors of arrays which represents areas crossing X and Y stretchable and unstretchable areas of 9-patch bitmap. For more information look on <code>struct Res_png_9patch</code> commentaries <b>[here](https://android.googlesource.com/platform/frameworks/base/+/master/include/androidfw/ResourceTypes.h)</b>.<br>
+Long story short, if you have the same color in that area - the color for thar area will be that color. If color of that area is Tranparen (has alpha 0) - the color should be <code>Color.TRANSPARANT</code>. If the area is filled with different colors - the array should content <code>NO_COLOR</code> value. See static methods description to see how easily properly create this array.
 
 The class has only one object-dependent method:
 
