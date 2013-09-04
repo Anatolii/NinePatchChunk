@@ -14,7 +14,7 @@ The main class of the library is NinePatchChunk.<br>
 <code>public static final int NO_COLOR = 0x00000001;</code> - The 9 patch segment is not a solid color.<br>
 <code>public static final int TRANSPARENT_COLOR = 0x00000000;</code> - The 9 patch segment is completely transparent.<br>
 
-Firstly let's go throu the fields of the class object you would use.
+Firstly let's go through the fields of the class object you would use.
 
 - <code>boolean wasSerialized</code> - The indicator if this chunk was serialized or not. I didn't saw images without this variable equals true. If you will - feel free to contact me. This value is <code>true</code> by default.<br>
 - <code>ArrayList\<Div\> xDivs</code> - An array with stratchable areas goes on X axes. The 0 start pixel is pixel of actual bitmab without 9-patch 1-pixel border. The <code>Div</code> class will be described bellow. By default this value is null<br>
@@ -30,7 +30,7 @@ The class has only one object-dependent method:
 - <code>byte[] toBytes()</code> - serializes your current chunk instance to a byte array so you can use it creating NinePatchDrawable object.
 
 
-Also NinePatchChunk class has some static methods. Let's go throu them.<br>
+Also NinePatchChunk class has some static methods. Let's go through them.<br>
 - <code>NinePatchChunk parse(byte[] data)</code> - Parses any serialized chunk into the object you can use or edit.<br>
 - <code>NinePatchDrawable create9PatchDrawable(Resources resources, Bitmap bitmap, String srcName)</code> - Creates NinePatchDrawable right from raw Bitmap object. So resulting drawable will have width and height 2 pixels less if it is raw, not compiled 9-patch resource.<br>
 - <code>NinePatchChunk createEmptyChunk() - Jut creates empty chunk object to you have ability to change it.
