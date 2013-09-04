@@ -31,7 +31,7 @@ The class has only one object-dependent method:
 
 
 Also NinePatchChunk class has some static methods. Let's go throu them.<br>
-- <code>NinePatchChunk parse(byte[] data)</code> - Prses any serialized chunk into the object you can use or edit.<br>
+- <code>NinePatchChunk parse(byte[] data)</code> - Parses any serialized chunk into the object you can use or edit.<br>
 - <code>NinePatchDrawable create9PatchDrawable(Resources resources, Bitmap bitmap, String srcName)</code> - Creates NinePatchDrawable right from raw Bitmap object. So resulting drawable will have width and height 2 pixels less if it is raw, not compiled 9-patch resource.<br>
 - <code>NinePatchChunk createEmptyChunk() - Jut creates empty chunk object to you have ability to change it.
 - <code>int[] createColorsArray(NinePatchChunk chunk, int bitmapWidth, int bitmapHeight)</code> - Creates a proper color array sized according to your X and Y divs.
