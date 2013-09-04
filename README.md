@@ -23,7 +23,7 @@ Firstly let's go through the fields of the class object you would use.
 Let's put some example. Let's say that you have 7x7 9-patch image. and you want the content will be exactly in the middle of the image.<br>
 So your final image size without 9-patch specific borders would be 5x5 and if you want the contend will be placed inside 3-d pixel area you sould define paddings as <code>Rect(2,2,2,2)</code>
 - <code>int colors[]</code> - The colors of arrays which represents areas crossing X and Y stretchable and unstretchable areas of 9-patch bitmap. For more information look on <code>struct Res_png_9patch</code> commentaries <b>[here](https://android.googlesource.com/platform/frameworks/base/+/master/include/androidfw/ResourceTypes.h)</b>.<br>
-Long story short, if you have the same color in that area - the color for thar area will be that color. If color of that area is Tranparen (has alpha 0) - the color should be <code>Color.TRANSPARANT</code>. If the area is filled with different colors - the array should content <code>NO_COLOR</code> value. See static methods description to see how easily properly create this array.
+Long story short, if you have the same color in that area - the color for thar area will be that color. If color of that area is Tranparen (has alpha 0) - the color should be <code>Color.TRANSPARENT</code>. If the area is filled with different colors - the array should content <code>NO_COLOR</code> value. See static methods description to see how easily properly create this array.
 
 The class has only one object-dependent method:
 
@@ -35,15 +35,15 @@ Also NinePatchChunk class has some static methods. Let's go through them.<br>
 - <code>NinePatchDrawable create9PatchDrawable(Resources resources, Bitmap bitmap, String srcName)</code> - Creates NinePatchDrawable right from raw Bitmap object. So resulting drawable will have width and height 2 pixels less if it is raw, not compiled 9-patch resource.<br>
 - <code>NinePatchChunk createEmptyChunk() - Jut creates empty chunk object to you have ability to change it.
 - <code>int[] createColorsArray(NinePatchChunk chunk, int bitmapWidth, int bitmapHeight)</code> - Creates a proper color array sized according to your X and Y divs.
-- <code>void createColorsArrayAndSet(NinePatchChunk chunk, int bitmapWidth, int bitmapHeight)</code> - The same as previout but this method also sets created array to your chunk if it is not null.
-- <code>boolean isRawNinePatchBitmap(Bitmap bitmap)</code> - This method checks if the bitmap is 9-patch imgage.
+- <code>void createColorsArrayAndSet(NinePatchChunk chunk, int bitmapWidth, int bitmapHeight)</code> - The same as previous but this method also sets created array to your chunk if it is not null.
+- <code>boolean isRawNinePatchBitmap(Bitmap bitmap)</code> - This method checks if the bitmap is 9-patch image.
 
-And finaly, Div object description. This object is used to define stratchable areas:<br>
+And finally, Div object description. This object is used to define stratchable areas:<br>
 
 - <code>int start</code> - the starting pixel of stratchable area. The count starts from 0.
 - <code>int stop</code> - the ending pixel of stratchable area. This pixel is right after the latest Color.BLACK pixel of the stratchable area.
 
 --------
-This is it. The using is simple as that. See the java doc to know more.<br>
+This is it. The using is simple as that. See the java doc to learn more.<br>
 If you have some additional question - feel free to contact me.<br><br>
 Thanks!
