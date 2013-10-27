@@ -44,6 +44,33 @@ And finally, Div object description. This object is used to define stratchable a
 - <code>int stop</code> - the ending pixel of stratchable area. This pixel is right after the latest Color.BLACK pixel of the stratchable area.
 
 --------
+Building from sources
+--------
+
+NinePatchChunk is a library which delivers as open source project.<br>
+As build tool it uses Gradle build system.
+
+In order to build the library you need this environtment installed:
+- Java JDK 6
+- Android SDK with build tools version 18.1.1
+
+For success build this environtment variables should be defined in your system:
+- JAVA_HOME     - will point to your JDK location
+- ANDROID_HOME  - will point to Android SDK location
+ 
+For the next step go to command line and then go to location where NinePatchChunk library sources are stored<br>
+<code>cd <path to the library>/NinePatchChunk</code> (where <i>gradlew</i> script file stored)<br>
+
+From this point in order to get output files you just need to run this command from command line:<br>
+<code>graddlew assemble</code> to build release and debug aar files<br>
+<code>graddlew assembleDebug</code> to build debug aar file only<br>
+<code>graddlew assembleRelease</code> to build release aar file only<br>
+
+That's it. So now you can find the output files inside this folder:<br>
+<code>NinePatchChunk\NinePatchChunkLib\build\libs</code> 
+
+--------
+
 This is it. The using is simple as that. See the java doc to learn more.<br>
 If you have some additional question - feel free to contact me.<br><br>
 Thanks!
