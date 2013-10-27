@@ -127,7 +127,7 @@ public class NinePatchChunk implements Externalizable{
 		} else {
 			outBitmap = Bitmap.createBitmap(bitmap, 1, 1, bitmap.getWidth() - 2, bitmap.getHeight() - 2);
 			try {
-				chunk = createChunk(bitmap);
+				chunk = createChunkFromRawBitmap(bitmap, false);
 			} catch (WrongPaddingException e) {
 				chunk = NinePatchChunk.createEmptyChunk();
 			} catch (DivLengthException e) {
@@ -135,6 +135,20 @@ public class NinePatchChunk implements Externalizable{
 			}
 		}
 		return new NinePatchDrawable(resources, outBitmap, chunk.toBytes(), chunk.padding, srcName);
+	}
+
+	/**
+	 * Creates NinePatchChunk instance from raw bitmap image. Method calls <code>isRawNinePatchBitmap</code>
+	 *  method to make sure the bitmap is valid.
+	 * @param bitmap
+	 * @return new instance of chunk or empty chunk if bitmap is null or some Exceptions happen.
+	 */
+	public static NinePatchChunk createChunkFromRawBitmap(Bitmap bitmap) {
+		try{
+			return createChunkFromRawBitmap(bitmap, true);
+		}catch (RuntimeException e){
+			return createEmptyChunk();
+		}
 	}
 
 	/**
@@ -319,8 +333,10 @@ public class NinePatchChunk implements Externalizable{
 		}
 	}
 
-	private static NinePatchChunk createChunk(Bitmap bitmap) throws WrongPaddingException, DivLengthException {
-
+	private static NinePatchChunk createChunkFromRawBitmap(Bitmap bitmap, boolean checkBitmap) throws WrongPaddingException, DivLengthException {
+		if(checkBitmap && !isRawNinePatchBitmap(bitmap)){
+			return createEmptyChunk();
+		}
 		NinePatchChunk out = new NinePatchChunk();
 		setupStretchableRegions(bitmap, out);
 		setupPadding(bitmap, out);
