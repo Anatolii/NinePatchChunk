@@ -19,5 +19,8 @@ android {
     defaultConfig {
         minSdkVersion 4
         targetSdkVersion 18
+
+        testPackageName "ua.anatolii.graphics.ninepatch.test"
+        testInstrumentationRunner "android.test.InstrumentationTestRunner"
     }
 }
