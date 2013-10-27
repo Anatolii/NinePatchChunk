@@ -328,7 +328,7 @@ public class NinePatchChunk implements Externalizable{
 	}
 
 	private static void checkDivCount(byte divCount) throws DivLengthException {
-		if (divCount == 0 || (divCount & 1) == 0) {
+		if (divCount == 0 || ((divCount & 1) != 0)) {
 			throw new DivLengthException("Div count should be aliquot 2 and more then 0, but was: " + divCount);
 		}
 	}
