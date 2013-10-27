@@ -138,12 +138,14 @@ public class NinePatchChunk implements Externalizable{
 	}
 
 	/**
-	 * Creates NinePatchChunk instance from raw bitmap image. Method calls <code>isRawNinePatchBitmap</code>
+	 * * Creates NinePatchChunk instance from raw bitmap image. Method calls <code>isRawNinePatchBitmap</code>
 	 *  method to make sure the bitmap is valid.
-	 * @param bitmap
+	 * @param bitmap source image
 	 * @return new instance of chunk or empty chunk if bitmap is null or some Exceptions happen.
+	 * @throws WrongPaddingException if bitmap contains more then one vertical or horizontal region to describe where content should be placed
+	 * @throws DivLengthException if number of resizing areas divs not aliquot 2 or equal 0.
 	 */
-	public static NinePatchChunk createChunkFromRawBitmap(Bitmap bitmap) {
+	public static NinePatchChunk createChunkFromRawBitmap(Bitmap bitmap) throws WrongPaddingException, DivLengthException{
 		try{
 			return createChunkFromRawBitmap(bitmap, true);
 		}catch (RuntimeException e){
@@ -235,7 +237,7 @@ public class NinePatchChunk implements Externalizable{
 
 	/**
 	 * Checks if bitmap is raw, not compiled 9-patch resource.
-	 * @param bitmap
+	 * @param bitmap source image
 	 * @return true if so and false if not or bitmap is null.
 	 */
 	public static boolean isRawNinePatchBitmap(Bitmap bitmap) {
