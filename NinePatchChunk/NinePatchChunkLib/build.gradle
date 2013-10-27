@@ -12,6 +12,12 @@ repositories {
     mavenCentral()
 }
 
+task releaseLibrary(dependsOn: 'assemble',type: Copy){
+    from file(new File(buildDir,'libs'))
+    into file(new File(buildDir,'../../../library'))
+    include("**/*.aar")
+}
+
 android {
     compileSdkVersion 18
     buildToolsVersion "18.1.1"
