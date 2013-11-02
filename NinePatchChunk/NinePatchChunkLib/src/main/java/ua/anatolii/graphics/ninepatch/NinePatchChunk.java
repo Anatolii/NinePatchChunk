@@ -1,7 +1,9 @@
 package ua.anatolii.graphics.ninepatch;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.NinePatch;
 import android.graphics.Rect;
@@ -9,6 +11,7 @@ import android.graphics.drawable.NinePatchDrawable;
 
 import java.io.Externalizable;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.nio.BufferUnderflowException;
@@ -31,6 +34,11 @@ public class NinePatchChunk implements Externalizable{
 	 * The 9 patch segment is completely transparent.
 	 */
 	public static final int TRANSPARENT_COLOR = 0x00000000;
+
+    /**
+     * Default density for image loading from some InputStream
+     */
+    public static final int DEFAULT_DENSITY = 160;
 
 	/**
 	 * By default it's true
@@ -107,6 +115,7 @@ public class NinePatchChunk implements Externalizable{
 		return chunk;
 	}
 
+    //TODO add additional methods which will use InputStream for image loading.
 	/**
 	 * Creates NinePatchDrawable right from raw Bitmap object. So resulting drawable will have width and height 2 pixels less if it is raw, not compiled 9-patch resource.
 	 * @param resources
@@ -121,7 +130,7 @@ public class NinePatchChunk implements Externalizable{
 		if(NinePatch.isNinePatchChunk(bitmap.getNinePatchChunk())){
 			outBitmap = bitmap;
 			chunk = NinePatchChunk.parse(bitmap.getNinePatchChunk());
-		}else if (bitmap.getWidth() < 3 || bitmap.getHeight() < 3 || !isRawNinePatchBitmap(bitmap)) {
+		}else if (!isRawNinePatchBitmap(bitmap)) {
 			outBitmap = bitmap;
 			chunk = NinePatchChunk.createEmptyChunk();
 		} else {
@@ -152,6 +161,39 @@ public class NinePatchChunk implements Externalizable{
 			return createEmptyChunk();
 		}
 	}
+
+    public static ImageLoadingResult createChunkFromRawBitmap(Context context, InputStream inputStream){
+        return createChunkFromRawBitmap(context, inputStream, DEFAULT_DENSITY);
+    }
+
+    public static ImageLoadingResult createChunkFromRawBitmap(Context context, InputStream inputStream, int imageDensity){
+        BitmapFactory.Options opts = new BitmapFactory.Options();
+        opts.inDensity = imageDensity;
+        Bitmap testBitmap = BitmapFactory.decodeStream(inputStream, new Rect(), opts);
+        NinePatchChunk chunk = null;
+        if(NinePatchChunk.isRawNinePatchBitmap(testBitmap)){
+            chunk = NinePatchChunk.createChunkFromRawBitmap(testBitmap);
+            Bitmap content = Bitmap.createBitmap(testBitmap, 1, 1, testBitmap.getWidth() - 2, testBitmap.getHeight() - 2);
+            int targetDensity = context.getResources().getDisplayMetrics().densityDpi;
+            float densityChange = (float )targetDensity / DEFAULT_DENSITY;
+            if (densityChange != 1f) {
+                int dstWidth = Math.round(content.getWidth() * densityChange);
+                int dstHeight = Math.round(content.getHeight() * densityChange);
+                content = Bitmap.createScaledBitmap(content, dstWidth, dstHeight, true);
+                content.setDensity(targetDensity);
+                chunk.padding = new Rect(Math.round(chunk.padding.left * densityChange),
+                        Math.round(chunk.padding.top * densityChange),
+                        Math.round(chunk.padding.right * densityChange),
+                        Math.round(chunk.padding.bottom * densityChange));
+
+                recalculateDivs(densityChange, chunk.xDivs);
+                recalculateDivs(densityChange, chunk.yDivs);
+            }
+            testBitmap = content;
+        }else
+            chunk = NinePatchChunk.createEmptyChunk();
+        return new ImageLoadingResult(testBitmap, chunk);
+    }
 
 	/**
 	 * Simply creates new empty NinePatchChunk object. You can use it to modify data as you want to.
@@ -242,6 +284,8 @@ public class NinePatchChunk implements Externalizable{
 	 */
 	public static boolean isRawNinePatchBitmap(Bitmap bitmap) {
 		if(bitmap == null) return false;
+        if(bitmap.getWidth() < 3 || bitmap.getHeight() < 3)
+            return false;
 		if(!isCornerPixelsAreTrasperent(bitmap))
 			return false;
 		if(!hasNinePatchBorder(bitmap))
@@ -463,4 +507,11 @@ public class NinePatchChunk implements Externalizable{
 		}
 		return tmpDiv;
 	}
+
+    private static void recalculateDivs(float densityChange, ArrayList<Div> divs) {
+        for(Div div : divs){
+            div.start = Math.round(div.start * densityChange);
+            div.stop = Math.round(div.stop * densityChange);
+        }
+    }
 }
