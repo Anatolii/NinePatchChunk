@@ -19,12 +19,12 @@ task releaseLibrary(dependsOn: 'assemble',type: Copy){
 }
 
 android {
-    compileSdkVersion 18
-    buildToolsVersion "18.1.1"
+    compileSdkVersion 19
+    buildToolsVersion "19.0.0"
 
     defaultConfig {
-        minSdkVersion 4
-        targetSdkVersion 18
+        minSdkVersion 8
+        targetSdkVersion 19
 
         testPackageName "ua.anatolii.graphics.ninepatch.test"
         testInstrumentationRunner "android.test.InstrumentationTestRunner"
