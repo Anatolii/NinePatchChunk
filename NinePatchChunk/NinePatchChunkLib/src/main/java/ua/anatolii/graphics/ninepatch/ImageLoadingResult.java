@@ -10,15 +10,27 @@ import android.graphics.drawable.NinePatchDrawable;
  */
 public class ImageLoadingResult {
 
+    /**
+     * Loaded bitmap on which base chunk was created. Can be null.
+     */
     public final Bitmap bitmap;
 
+    /**
+     * Chunk instance. Can be null.
+     */
     public final NinePatchChunk chunk;
 
-    public ImageLoadingResult(Bitmap bitmap, NinePatchChunk chunk) {
+    protected ImageLoadingResult(Bitmap bitmap, NinePatchChunk chunk) {
         this.bitmap = bitmap;
         this.chunk = chunk;
     }
 
+    /**
+     * Method creates NinePatchDrawable according to the current object state.
+     * @param resources uses to get some information about system, get access to resources cache.
+     * @param strName if not null it will be cached with this name inside resource manager.
+     * @return 9 patch drawable instance or null if bitmap was null.
+     */
     public NinePatchDrawable getNinePatchDrawable(Resources resources, String strName){
         if(bitmap == null)
             return null;

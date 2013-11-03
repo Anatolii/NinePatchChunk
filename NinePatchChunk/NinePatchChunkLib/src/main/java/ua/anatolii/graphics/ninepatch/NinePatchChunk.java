@@ -5,7 +5,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.NinePatch;
 import android.graphics.Rect;
 import android.graphics.drawable.NinePatchDrawable;
 
@@ -25,7 +24,7 @@ import java.util.Arrays;
  */
 public class NinePatchChunk implements Externalizable{
 
-	/**
+    /**
 	 * The 9 patch segment is not a solid color.
 	 */
 	public static final int NO_COLOR = 0x00000001;
@@ -65,7 +64,7 @@ public class NinePatchChunk implements Externalizable{
 	 */
 	public int colors[];
 
-	/**
+    /**
 	 * Creates new NinePatchChunk from byte array.
 	 * Note! In order to avoid some Runtime issues, please, do this check before using this method: NinePatch.isNinePatchChunk(byte[] chunk).
 	 * @param data array of chunk data
@@ -115,8 +114,7 @@ public class NinePatchChunk implements Externalizable{
 		return chunk;
 	}
 
-    //TODO add additional methods which will use InputStream for image loading.
-	/**
+    /**
 	 * Creates NinePatchDrawable right from raw Bitmap object. So resulting drawable will have width and height 2 pixels less if it is raw, not compiled 9-patch resource.
 	 * @param resources
 	 * @param bitmap The bitmap describing the patches. Can be loaded from application resources
@@ -124,27 +122,18 @@ public class NinePatchChunk implements Externalizable{
 	 * @return new NinePatchDrawable object or null if bitmap parameter is null.
 	 */
 	public static NinePatchDrawable create9PatchDrawable(Resources resources, Bitmap bitmap, String srcName) {
-		if (bitmap == null) return null;
-		Bitmap outBitmap;
-		NinePatchChunk chunk;
-		if(NinePatch.isNinePatchChunk(bitmap.getNinePatchChunk())){
-			outBitmap = bitmap;
-			chunk = NinePatchChunk.parse(bitmap.getNinePatchChunk());
-		}else if (!isRawNinePatchBitmap(bitmap)) {
-			outBitmap = bitmap;
-			chunk = NinePatchChunk.createEmptyChunk();
-		} else {
-			outBitmap = Bitmap.createBitmap(bitmap, 1, 1, bitmap.getWidth() - 2, bitmap.getHeight() - 2);
-			try {
-				chunk = createChunkFromRawBitmap(bitmap, false);
-			} catch (WrongPaddingException e) {
-				chunk = NinePatchChunk.createEmptyChunk();
-			} catch (DivLengthException e) {
-				chunk = NinePatchChunk.createEmptyChunk();
-			}
-		}
-		return new NinePatchDrawable(resources, outBitmap, chunk.toBytes(), chunk.padding, srcName);
+        return BitmapType.determineBitmapType(bitmap).createNinePatchDrawable(resources, bitmap, srcName);
 	}
+
+    public static NinePatchDrawable create9PatchDrawable(Context context, InputStream inputStream, String srcName) {
+        return create9PatchDrawable(context, inputStream, DEFAULT_DENSITY, srcName);
+    }
+
+    public static NinePatchDrawable create9PatchDrawable(Context context, InputStream inputStream, int imageDensity, String srcName) {
+        ImageLoadingResult loadingResult = createChunkFromRawBitmap(context, inputStream, imageDensity);
+        return loadingResult.getNinePatchDrawable(context.getResources(), srcName);
+    }
+
 
 	/**
 	 * * Creates NinePatchChunk instance from raw bitmap image. Method calls <code>isRawNinePatchBitmap</code>
@@ -169,30 +158,12 @@ public class NinePatchChunk implements Externalizable{
     public static ImageLoadingResult createChunkFromRawBitmap(Context context, InputStream inputStream, int imageDensity){
         BitmapFactory.Options opts = new BitmapFactory.Options();
         opts.inDensity = imageDensity;
-        Bitmap testBitmap = BitmapFactory.decodeStream(inputStream, new Rect(), opts);
-        NinePatchChunk chunk = null;
-        if(NinePatchChunk.isRawNinePatchBitmap(testBitmap)){
-            chunk = NinePatchChunk.createChunkFromRawBitmap(testBitmap);
-            Bitmap content = Bitmap.createBitmap(testBitmap, 1, 1, testBitmap.getWidth() - 2, testBitmap.getHeight() - 2);
-            int targetDensity = context.getResources().getDisplayMetrics().densityDpi;
-            float densityChange = (float )targetDensity / DEFAULT_DENSITY;
-            if (densityChange != 1f) {
-                int dstWidth = Math.round(content.getWidth() * densityChange);
-                int dstHeight = Math.round(content.getHeight() * densityChange);
-                content = Bitmap.createScaledBitmap(content, dstWidth, dstHeight, true);
-                content.setDensity(targetDensity);
-                chunk.padding = new Rect(Math.round(chunk.padding.left * densityChange),
-                        Math.round(chunk.padding.top * densityChange),
-                        Math.round(chunk.padding.right * densityChange),
-                        Math.round(chunk.padding.bottom * densityChange));
+        Bitmap bitmap = BitmapFactory.decodeStream(inputStream, new Rect(), opts);
 
-                recalculateDivs(densityChange, chunk.xDivs);
-                recalculateDivs(densityChange, chunk.yDivs);
-            }
-            testBitmap = content;
-        }else
-            chunk = NinePatchChunk.createEmptyChunk();
-        return new ImageLoadingResult(testBitmap, chunk);
+        BitmapType type = BitmapType.determineBitmapType(bitmap);
+        NinePatchChunk chunk = type.createChunk(bitmap);
+        bitmap = type.modifyBitmap(context.getResources(), bitmap, chunk);
+        return new ImageLoadingResult(bitmap, chunk);
     }
 
 	/**
@@ -364,7 +335,19 @@ public class NinePatchChunk implements Externalizable{
 		output.write(bytes);
 	}
 
-	private static void readDivs(int divs, ByteBuffer byteBuffer, ArrayList<Div> divArrayList) {
+    protected static NinePatchChunk createChunkFromRawBitmap(Bitmap bitmap, boolean checkBitmap) throws WrongPaddingException, DivLengthException {
+        if(checkBitmap && !isRawNinePatchBitmap(bitmap)){
+            return createEmptyChunk();
+        }
+        NinePatchChunk out = new NinePatchChunk();
+        setupStretchableRegions(bitmap, out);
+        setupPadding(bitmap, out);
+
+        setupColors(bitmap, out);
+        return out;
+    }
+
+    private static void readDivs(int divs, ByteBuffer byteBuffer, ArrayList<Div> divArrayList) {
 		for (int i = 0; i < divs; i++) {
 			Div div = new Div();
 			div.start = byteBuffer.getInt();
@@ -377,18 +360,6 @@ public class NinePatchChunk implements Externalizable{
 		if (divCount == 0 || ((divCount & 1) != 0)) {
 			throw new DivLengthException("Div count should be aliquot 2 and more then 0, but was: " + divCount);
 		}
-	}
-
-	private static NinePatchChunk createChunkFromRawBitmap(Bitmap bitmap, boolean checkBitmap) throws WrongPaddingException, DivLengthException {
-		if(checkBitmap && !isRawNinePatchBitmap(bitmap)){
-			return createEmptyChunk();
-		}
-		NinePatchChunk out = new NinePatchChunk();
-		setupStretchableRegions(bitmap, out);
-		setupPadding(bitmap, out);
-
-		setupColors(bitmap, out);
-		return out;
 	}
 
 	private static void setupColors(Bitmap bitmap, NinePatchChunk out) {
@@ -507,11 +478,4 @@ public class NinePatchChunk implements Externalizable{
 		}
 		return tmpDiv;
 	}
-
-    private static void recalculateDivs(float densityChange, ArrayList<Div> divs) {
-        for(Div div : divs){
-            div.start = Math.round(div.start * densityChange);
-            div.stop = Math.round(div.stop * densityChange);
-        }
-    }
 }
