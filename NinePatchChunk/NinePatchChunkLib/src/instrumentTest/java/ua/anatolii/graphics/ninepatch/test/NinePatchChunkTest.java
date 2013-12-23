@@ -31,7 +31,6 @@ public class NinePatchChunkTest extends AndroidTestCase {
         ImageLoadingResult loadingResult = NinePatchChunk.createChunkFromRawBitmap(getContext(), is);
         NinePatchChunk chunk = loadingResult.chunk;
         Bitmap testBitmap = loadingResult.bitmap;
-        loadingResult = null;
         assertNotNull("Loaded test bitmap can't be considered as raw NinePatch bitmap", chunk);
         assertEquals("Test end system bitmaps have different density.", bitmap.getDensity(), testBitmap.getDensity());
         assertEquals("Test and system bitmaps have different sizes",
