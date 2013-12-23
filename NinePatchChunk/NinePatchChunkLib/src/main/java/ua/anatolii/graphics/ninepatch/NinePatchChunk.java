@@ -158,7 +158,8 @@ public class NinePatchChunk implements Externalizable{
     public static ImageLoadingResult createChunkFromRawBitmap(Context context, InputStream inputStream, int imageDensity){
         BitmapFactory.Options opts = new BitmapFactory.Options();
         opts.inDensity = imageDensity;
-        Bitmap bitmap = BitmapFactory.decodeStream(inputStream, new Rect(), opts);
+	    opts.inTargetDensity = imageDensity;
+	    Bitmap bitmap = BitmapFactory.decodeStream(inputStream, new Rect(), opts);
 
         BitmapType type = BitmapType.determineBitmapType(bitmap);
         NinePatchChunk chunk = type.createChunk(bitmap);
