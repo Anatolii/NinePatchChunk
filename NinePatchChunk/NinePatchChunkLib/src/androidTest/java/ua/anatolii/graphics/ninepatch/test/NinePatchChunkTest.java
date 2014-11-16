@@ -4,18 +4,12 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.test.AndroidTestCase;
 import android.util.Pair;
+import ua.anatolii.graphics.ninepatch.ImageLoadingResult;
+import ua.anatolii.graphics.ninepatch.NinePatchChunk;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
-import ua.anatolii.graphics.ninepatch.ImageLoadingResult;
-import ua.anatolii.graphics.ninepatch.NinePatchChunk;
+import java.util.*;
 
 /**
  * Created by Anatolii on 10/27/13.
