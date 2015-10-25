@@ -15,7 +15,7 @@ repositories {
 	}
 }
 task releaseLibrary(dependsOn: 'assemble', type: Copy) {
-	from file(new File(buildDir, 'libs'))
+	from file(new File(buildDir, 'outputs\\aar'))
 	into file(new File(buildDir, '../../../library'))
 	include("**/*.aar")
 }
