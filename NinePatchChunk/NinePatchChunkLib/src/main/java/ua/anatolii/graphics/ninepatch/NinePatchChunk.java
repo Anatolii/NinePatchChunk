@@ -446,10 +446,10 @@ public class NinePatchChunk implements Externalizable {
 	private static void setupPadding(Bitmap bitmap, NinePatchChunk out) throws WrongPaddingException {
 		int maxXPixels = bitmap.getWidth() - 2;
 		int maxYPixels = bitmap.getHeight() - 2;
-		ArrayList<Div> xPaddings = getXDivs(bitmap, bitmap.getWidth() - 1);
+		ArrayList<Div> xPaddings = getXDivs(bitmap, bitmap.getHeight() - 1);
 		if (xPaddings.size() > 1)
 			throw new WrongPaddingException("Raw padding is wrong. Should be only one horizontal padding region");
-		ArrayList<Div> yPaddings = getYDivs(bitmap, bitmap.getHeight() - 1);
+		ArrayList<Div> yPaddings = getYDivs(bitmap, bitmap.getWidth() - 1);
 		if (yPaddings.size() > 1)
 			throw new WrongPaddingException("Column padding is wrong. Should be only one vertical padding region");
 		if (xPaddings.size() == 0) xPaddings.add(out.xDivs.get(0));
