@@ -89,8 +89,8 @@ public class NinePatchChunk implements Externalizable {
 		chunk.colors = new int[byteBuffer.get()];
 
 		// skip 8 bytes
-		byteBuffer.getInt();
-		byteBuffer.getInt();
+		byteBuffer.getInt();//position = 4
+		byteBuffer.getInt();//position = 8
 
 		chunk.padding.left = byteBuffer.getInt();
 		chunk.padding.right = byteBuffer.getInt();
@@ -98,7 +98,7 @@ public class NinePatchChunk implements Externalizable {
 		chunk.padding.bottom = byteBuffer.getInt();
 
 		// skip 4 bytes
-		byteBuffer.getInt();
+		byteBuffer.getInt();//position = 28
 
 		int xDivs = divXCount >> 1;
 		chunk.xDivs = new ArrayList<Div>(xDivs);
@@ -131,7 +131,7 @@ public class NinePatchChunk implements Externalizable {
 	 *
 	 * @param context
 	 * @param inputStream The input stream that holds the raw data to be decoded into a bitmap. Uses <code>DEFAULT_DENSITY</code> value for image decoding.
-	 * @param srcName The name of the source for the bitmap. Might be null.
+	 * @param srcName     The name of the source for the bitmap. Might be null.
 	 * @return NinePatchDrawable instance.
 	 */
 	public static NinePatchDrawable create9PatchDrawable(Context context, InputStream inputStream, String srcName) {
@@ -142,9 +142,9 @@ public class NinePatchChunk implements Externalizable {
 	 * Creates NinePatchDrawable from inputStream.
 	 *
 	 * @param context
-	 * @param inputStream The input stream that holds the raw data to be decoded into a bitmap.
+	 * @param inputStream  The input stream that holds the raw data to be decoded into a bitmap.
 	 * @param imageDensity density of the image if known in advance.
-	 * @param srcName new NinePatchDrawable object or null if bitmap parameter is null.
+	 * @param srcName      new NinePatchDrawable object or null if bitmap parameter is null.
 	 * @return
 	 */
 	public static NinePatchDrawable create9PatchDrawable(Context context, InputStream inputStream, int imageDensity, String srcName) {
@@ -170,6 +170,7 @@ public class NinePatchChunk implements Externalizable {
 
 	/**
 	 * Creates chunk from bitmap loaded from input stream. Uses <code>DEFAULT_DENSITY</code> value for image decoding.
+	 *
 	 * @param context
 	 * @param inputStream The input stream that holds the raw data to be decoded into a bitmap.
 	 * @return loading result which contains chunk object and loaded bitmap. Note! Resulting bitmap can be not the same as the source bitmap.
@@ -180,8 +181,9 @@ public class NinePatchChunk implements Externalizable {
 
 	/**
 	 * Creates chunk from bitmap loaded from input stream.
+	 *
 	 * @param context
-	 * @param inputStream The input stream that holds the raw data to be decoded into a bitmap.
+	 * @param inputStream  The input stream that holds the raw data to be decoded into a bitmap.
 	 * @param imageDensity density of the image if known in advance.
 	 * @return loading result which contains chunk object and loaded bitmap. Note! Resulting bitmap can be not the same as the source bitmap.
 	 */
@@ -195,8 +197,9 @@ public class NinePatchChunk implements Externalizable {
 
 	/**
 	 * Creates chunk from raw bitmap.
+	 *
 	 * @param context
-	 * @param bitmap source image.
+	 * @param bitmap  source image.
 	 * @return loading result which contains chunk object and loaded bitmap. Note! Resulting bitmap can be not the same as the source bitmap.
 	 */
 	public static ImageLoadingResult createChunkFromRawBitmap(Context context, Bitmap bitmap) {
