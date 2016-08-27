@@ -1,6 +1,7 @@
 buildscript {
 	repositories {
 		mavenCentral()
+		jcenter()
 	}
 	dependencies {
 		classpath 'com.android.tools.build:gradle:2.2.0-beta3'
@@ -42,11 +43,11 @@ android {
 	}
 
 	jacoco {
-		version = '0.7.5.201505241946'
+		version = '0.7.7.201606060606'
 	}
 }
 dependencies {
 	androidTestCompile 'org.hamcrest:java-hamcrest:2.0.0.0'
-	androidTestCompile 'de.lemona.android:android-testng:1.1.22'
+	androidTestCompile 'de.lemona.android:android-testng:1.1.27'
 	compile 'com.android.support:support-annotations:24.2.0'
 }
