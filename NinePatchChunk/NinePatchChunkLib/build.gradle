@@ -3,7 +3,7 @@ buildscript {
 		mavenCentral()
 	}
 	dependencies {
-		classpath 'com.android.tools.build:gradle:1.3.1'
+		classpath 'com.android.tools.build:gradle:2.2.0-beta3'
 	}
 }
 apply plugin: 'com.android.library'
@@ -21,11 +21,11 @@ task releaseLibrary(dependsOn: 'assemble', type: Copy) {
 }
 
 android {
-	compileSdkVersion 23
-	buildToolsVersion "23.0.1"
+	compileSdkVersion 24
+	buildToolsVersion "24.0.2"
 	defaultConfig {
 		minSdkVersion 10
-		targetSdkVersion 23
+		targetSdkVersion 24
 		testApplicationId 'ua.anatolii.graphics.ninepatch.test'
 		testInstrumentationRunner 'de.lemona.android.testng.TestNGRunner'
 	}
@@ -48,5 +48,5 @@ android {
 dependencies {
 	androidTestCompile 'org.hamcrest:java-hamcrest:2.0.0.0'
 	androidTestCompile 'de.lemona.android:android-testng:1.1.22'
-	compile 'com.android.support:support-annotations:23.1.0'
+	compile 'com.android.support:support-annotations:24.2.0'
 }
